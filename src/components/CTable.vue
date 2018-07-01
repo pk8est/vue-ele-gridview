@@ -14,7 +14,9 @@ export default{
  name: 'CTable',
  components: { CTd },
  props:{
-    tableData: []
+    tableData: {
+        default: () => []
+    },
  },
  data(){
     return {
