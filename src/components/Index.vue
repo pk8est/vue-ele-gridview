@@ -11,6 +11,11 @@
           <c-td key="id"  prop="id" label="ID" ></c-td>
           <c-td key="uid"  prop="uid" label="UID" ></c-td>
           <c-td key="title" prop="title" label="Title" ></c-td>
+          <c-td label="操作" >
+            <el-button @click="clickHandler" size="mini" slot-scope="scope">
+              {{ scope.row.live_id }}
+            </el-button>
+          </c-td>
         </template>
       </c-data-grid>
     </div>
@@ -35,6 +40,9 @@ export default {
     }
   },
   methods: {
+    clickHandler(){
+      console.info("clickHandler")
+    },
     dataLoadHandler(query){
       const total = this.list.length
       const start = Math.max(Math.min((query.page - 1) * query.size , total), 0);

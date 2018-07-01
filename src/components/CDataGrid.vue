@@ -82,7 +82,6 @@ export default {
     methods: {
         renderTable(h){
           //console.info(this.mColumns)
-
           return h(CTable, {
             props: {
               tableData: this.tableData,
