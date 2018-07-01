@@ -6,15 +6,16 @@ export default {
     components: { CTable, CPagination},
     props: {
         events: {
-            default: {}
+            default: () => {}
         },
         paginations: {
-            default: {}
+            default: () => {}
         },
         columns: {
             default: () => []
         },
         dataLoadHandler: {
+
         },
         searchQueryHandler: {
             default: () => (query) => query
@@ -80,7 +81,7 @@ export default {
     },
     methods: {
         renderTable(h){
-          console.info(this.mColumns)
+          //console.info(this.mColumns)
 
           return h(CTable, {
             props: {
@@ -108,7 +109,7 @@ export default {
         getDefaultSearchQuery(){
             return {
                 sort: this.sort,
-                page: this.mPaginations.currentPage - 1,
+                page: this.mPaginations.currentPage,
                 size: this.mPaginations.pageSize,
             }
         },
