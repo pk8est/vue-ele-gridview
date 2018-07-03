@@ -1,8 +1,9 @@
 <template>
   <el-table
-    :data="tableData" 
+     v-if="!resetTable"
+    :data="tableData"
   >
-    <slot></slot>
+    <slot name="tableBody"></slot>
   </el-table>
 </template>
 
@@ -14,6 +15,7 @@ export default{
  name: 'CTable',
  components: { CTd },
  props:{
+    resetTable: false,
     tableData: {
         default: () => []
     },

@@ -1,5 +1,7 @@
 <script>
+import Vue from 'vue'
 import CTable from './CTable'
+import CSetting from './CSetting'
 import CPagination from './CPagination'
 export default {
     name: 'CDataGrid',
@@ -28,10 +30,10 @@ export default {
     data() {
         return {
             sort: '',
+            resetTable: false,
             listLoading: false,
             tableData: [],
-            attrColumns: [],
-            attrNodes: []
+            slotColumns: this.columns
         }
     },
     computed: {
@@ -43,8 +45,14 @@ export default {
                 pageSize: 5,
             }, this.$props.paginations)
         },
-        mColumns: function(){
-            return this.columns.concat(this.attrColumns)
+        mColumns: {
+          get(){
+            return this.slotColumns.filter((column, index) => {
+              column.noDisplay = column.noDisplay ? column.noDisplay : false;
+              return column
+            })
+          },
+          set(value, index){}
         },
         mSortChangeHandler: function(){
             if(this.$props.sortChangeHandler !== undefined){
@@ -65,8 +73,7 @@ export default {
       if(this.$slots.hasOwnProperty("tableBody")){
           this.$slots.tableBody.map((slot, index) => {
               if(slot.data != undefined && slot.data.hasOwnProperty("attrs")){
-                  this.attrColumns.push(slot.data.attrs)
-                  this.attrNodes.push(slot)
+                  this.slotColumns.push(Object.assign({slot, index, sort: index}, slot.data.attrs))
               }
           })
       }
@@ -75,67 +82,103 @@ export default {
     },
     render(h){
       return h('div', {}, [
+          this.renderSetting(h),
           this.renderTable(h),
           this.renderPagination(h)
       ])
     },
     methods: {
-        renderTable(h){
-          //console.info(this.mColumns)
-          return h(CTable, {
-            props: {
-              tableData: this.tableData,
-              listLoading: this.listLoading,
-              columns: this.mColumns
-            },
-            on: {
-              "sort-change": this.mSortChangeHandler
-            },
-            slots: {
-              tableBody: this.$scopedSlots.tableBody
-            },
-          }, this.attrNodes)
-        },
-        renderPagination(h){
-          return h(CPagination, {
-            props: { ...this.mPaginations },
-            on: {
-              "current-change": this.handleCurrentChange,
-              "size-change": this.handleSizeChange
-            },
+      renderSetting(h){
+        return h(CSetting, {
+          props: {
+            columns: this.mColumns
+          },
+          on: {
+            'isDisplay': this.isDisplay,
+            'ordering': this.ordering,
+            'orderEnd': this.orderEnd
+          }
+        })
+      },
+      renderTable(h){
+        const tableBodySlots = this.slotColumns.map((column, index) => {
+          if(!column.noDisplay && column.slot != undefined){
+            return column.slot
+          }
+        })
+        return h(CTable, {
+          attrs:{
+            random: new Date().getTime()
+          },
+          props: {
+            resetTable: this.resetTable,
+            tableData: this.tableData,
+            listLoading: this.listLoading,
+            columns: this.mColumns
+          },
+          on: {
+            "sort-change": this.mSortChangeHandler
+          },
+          scopedSlots: {
+            tableBody: props => tableBodySlots
+          }
+        })
+      },
+      renderPagination(h){
+        return h(CPagination, {
+          props: { ...this.mPaginations },
+          on: {
+            "current-change": this.handleCurrentChange,
+            "size-change": this.handleSizeChange
+          },
+        })
+      },
+      isDisplay (key, $event){
+        let column = this.slotColumns[key]
+        column.noDisplay = !$event;
+        Vue.set(this.slotColumns, key, column)
+      },
+      ordering(value){
+        this.resetTable = true
+        this.slotColumns = value
+        this.$nextTick(() => {
+          this.resetTable = false
+        })
+      },
+      orderEnd(event){
+
+      },
+      getDefaultSearchQuery(){
+          return {
+              sort: this.sort,
+              page: this.mPaginations.currentPage,
+              size: this.mPaginations.pageSize,
+          }
+      },
+      fetchData() {
+          this.listLoading = true
+          this.$emit("fetch-data-start")
+          this.$props.dataLoadHandler(this.$props.searchQueryHandler(this.getDefaultSearchQuery()))
+          .then(({ data }) => {
+              this.tableData = data.data.map(item => this.$props.formatRowData(item))
+              this.mPaginations.total = data.total;
+              this.listLoading = false
+              this.$emit("fetch-data-end", true)
+          }).catch(() => {
+              this.listLoading = false
+              this.$emit("fetch-data-end", false)
           })
-        },
-        getDefaultSearchQuery(){
-            return {
-                sort: this.sort,
-                page: this.mPaginations.currentPage,
-                size: this.mPaginations.pageSize,
-            }
-        },
-        fetchData() {
-            this.listLoading = true
-            this.$emit("fetch-data-start")
-            this.$props.dataLoadHandler(this.$props.searchQueryHandler(this.getDefaultSearchQuery()))
-            .then(({ data }) => {
-                this.tableData = data.data.map(item => this.$props.formatRowData(item))
-                this.mPaginations.total = data.total;
-                this.listLoading = false
-                this.$emit("fetch-data-end", true)
-            }).catch(() => {
-                this.listLoading = false
-                this.$emit("fetch-data-end", false)
-            })
-        },
-        handleCurrentChange(currentPage) {
-            this.$emit("current-change", currentPage)
-            this.mPaginations.currentPage = currentPage
-            this.fetchData();
-        },
-        handleSizeChange(pageSize) {
-            this.$emit("size-page", pageSize)
-            this.mPaginations.pageSize = pageSize
-            this.fetchData();
-        },
+      },
+      handleCurrentChange(currentPage) {
+          this.$emit("current-change", currentPage)
+          this.mPaginations.currentPage = currentPage
+          this.fetchData();
+      },
+      handleSizeChange(pageSize) {
+          this.$emit("size-page", pageSize)
+          this.mPaginations.pageSize = pageSize
+          this.fetchData();
+      },
     }
 }
 </script>
