@@ -3,20 +3,26 @@
     <div class="app-container">
       <c-data-grid
         :dataLoadHandler="dataLoadHandler"
+        :columns="columns"
       >
-        <template slot="tableBody">
+        <!-- <template slot="tableBody">
           <c-td key="expand"  type="expand" label="详细" ></c-td>
           <c-td key="selection"  type="selection" ></c-td>
           <c-td key="index"  type="index" label="序号" ></c-td>
           <c-td key="id"  prop="id" label="ID" ></c-td>
           <c-td key="uid"  prop="uid" label="UID" ></c-td>
           <c-td key="title" prop="title" label="Title" ></c-td>
+          <c-td key="mark_time" prop="mark_time" label="MarkTime" >
+            <el-button size="mini" slot-scope="scope">
+              {{scope.row.mark_time * 1000 | parseTime('{y}-{m}-{d} {h}:{i}')}}
+            </el-button>
+          </c-td>
           <c-td label="操作" >
             <el-button @click="clickHandler" size="mini" slot-scope="scope">
               {{ scope.row.live_id }}
             </el-button>
           </c-td>
-        </template>
+        </template> -->
       </c-data-grid>
     </div>
   </div>
@@ -24,9 +30,11 @@
 
 <script>
 
+import Vue from 'vue'
 import CDataGrid from './CDataGrid'
 import CTd from './CTd'
 import { list } from './data'
+import { parseTime } from './util'
 
 export default {
   name: 'Index',
@@ -35,9 +43,31 @@ export default {
 
   },
   data() {
+    let that = this
     return {
-      list: list
+      list: list,
+      columns: [
+        {type: 'selection'},
+        {type: 'expand'},
+        {type: 'index'},
+        {prop: 'id', label: 'ID', sortable: 'custom', fixed: true},
+        {prop: 'uid', label: 'UID'},
+        {prop: 'title', label: 'Title', value: (value, index) => '#' + value},
+        {prop: 'mark_time', label: '标记时间', template: {
+            template: `<el-button @click="clickHandler" size="mini">{{$value}}</el-button>`,
+            methods: {
+              clickHandler(){
+                console.info(that)
+                console.info("clickHandler2")
+              }
+            }
+          }
+        }
+      ]
     }
+  },
+  filters: {
+    parseTime
   },
   methods: {
     clickHandler(){
