@@ -4,20 +4,25 @@
     :data="tableData"
   >
     <slot name="tableBody"></slot>
-    <slot name="tableColumn">
+    <!-- <slot name="tableColumns"> -->
       <c-td
         v-if="!column.noDisplay"
-        v-for="(column, key) in columnsList"
+        v-for="({ column, component, slotName }, key) in columnsList"
         v-bind="column"
+        :component="component"
+        :slotName="slotName"
         :key="key"
         :index="key"
         v-on="$listeners"
         >
-          <template :slot="typeof $scopedSlots[column.prop] !== 'undefined' ? column.prop : ''" slot-scope="scope">
-              <slot :name="column.prop" v-bind="scope"></slot>
+          <!-- <template v-if="slotName && typeof $scopedSlots[slotName] !== 'undefined'" :slot="slotName" slot-scope="scope">
+              <slot :name="slotName" v-bind="scope"></slot>
+          </template> -->
+          <template :slot="slotName && typeof $scopedSlots[slotName] !== 'undefined' ? slotName : ''" slot-scope="scope">
+              <slot :name="slotName" v-bind="scope"></slot>
           </template>
       </c-td>
-    </slot>
+    <!-- </slot> -->
   </el-table>
 </template>
 
@@ -43,13 +48,13 @@ export default{
     }
  },
  created(){
-
+   
  },
  computed: {
    columnsList: {
         get(){
-          return this.columns.filter(v => {
-              return v
+          return this.columns.map((column, index) => {
+            return column
           })
         },
         set(value){

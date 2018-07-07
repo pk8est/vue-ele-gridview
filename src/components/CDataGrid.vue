@@ -33,7 +33,8 @@ export default {
             resetTable: false,
             listLoading: false,
             tableData: [],
-            slotColumns: this.columns
+            scopedSlots: {},
+            slotColumns: []
         }
     },
     computed: {
@@ -47,12 +48,33 @@ export default {
         },
         mColumns: {
           get(){
-            return this.slotColumns.filter((column, index) => {
-              column.noDisplay = column.noDisplay ? column.noDisplay : false;
-              return column
+            return this.mSlotColumns.filter(({ column }, index) => {
+              column.noDisplay = column.noDisplay ? column.noDisplay : false
+              return true
             })
           },
-          set(value, index){}
+          set(value){
+          }
+        },
+        mSlotColumns: {
+          get(){
+            return this.slotColumns.concat(this.columns.map(column => {
+              let slotName = column.slot || column.prop || undefined
+              let component = column.template  || column.component || undefined
+              let render = column.render  || undefined
+              if(component){
+                component = Object.assign({}, {
+                  template: '<template/>',
+                  props: ["$index", "$value", "$scope", "$row", "$column"]
+                }, typeof component == 'string' ? { component } : component)
+              }
+              if(slotName !== undefined && render){
+                  this.scopedSlots[slotName] = (props) => render(this.$createElement, props)
+              }
+
+              return { column, component, slotName}
+            }))
+          }
         },
         mSortChangeHandler: function(){
             if(this.$props.sortChangeHandler !== undefined){
@@ -73,11 +95,10 @@ export default {
       if(this.$slots.hasOwnProperty("tableBody")){
           this.$slots.tableBody.map((slot, index) => {
               if(slot.data != undefined && slot.data.hasOwnProperty("attrs")){
-                  this.slotColumns.push(Object.assign({slot, index, sort: index}, slot.data.attrs))
+                  this.slotColumns.push({slot, column: slot.data.attrs})
               }
           })
       }
-
       this.fetchData()
     },
     render(h){
@@ -101,14 +122,15 @@ export default {
         })
       },
       renderTable(h){
-        const tableBodySlots = this.slotColumns.map((column, index) => {
-          if(!column.noDisplay && column.slot != undefined){
-            return column.slot
+        const tableBodySlots = this.mColumns.map(({column, slot}, index) => {
+          if(!column.noDisplay && slot != undefined){
+            return slot
           }
         })
+        let $scopedSlots = Object.assign({}, this.$scopedSlots, this.scopedSlots)
+        $scopedSlots.tableBody = props => tableBodySlots
         return h(CTable, {
           attrs:{
-            random: new Date().getTime()
           },
           props: {
             resetTable: this.resetTable,
@@ -119,9 +141,7 @@ export default {
           on: {
             "sort-change": this.mSortChangeHandler
           },
-          scopedSlots: {
-            tableBody: props => tableBodySlots
-          }
+          scopedSlots: $scopedSlots
         })
       },
       renderPagination(h){
@@ -135,7 +155,7 @@ export default {
       },
       isDisplay (key, $event){
         let column = this.slotColumns[key]
-        column.noDisplay = !$event;
+        column.column.noDisplay = !$event;
         Vue.set(this.slotColumns, key, column)
       },
       ordering(value){

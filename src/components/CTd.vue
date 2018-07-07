@@ -1,23 +1,16 @@
 <template>
     <el-table-column v-bind="$attrs" v-if="isScopedSlot">
       <template slot-scope="scope">
-        <slot v-bind="scope">
+        <slot v-bind="scope" :name="slotName">
+        <!-- <slot v-bind="scope" :name="$attrs.scopedSlotName"> -->
           <template v-if="$attrs.value">
             {{
               typeof $attrs.value == 'function' ? $attrs.value(scope.row[$attrs.prop], scope.$index, scope.row) : $attrs.value
             }}
           </template>
-          <!-- <template v-if="$attrs.template">
-            {{ renderTemplate($attrs.template, scope) }}
-          </template> -->
-          <!-- <component
-            v-else-if="$attrs.template"
-            :is="renderTemplate($attrs.template)"
-            v-on="$listeners"
-          ></component> -->
           <component
-            v-else-if="$attrs.template"
-            :is="renderTemplate($attrs.template)"
+            v-else-if="component"
+            :is="component"
             :$index="scope.$index"
             :$value="scope.row[$attrs.prop]"
             :$scope="scope"
@@ -37,9 +30,7 @@ import VRuntimeTemplate from "v-runtime-template";
 export default{
   name: 'CTd',
   components: { VRuntimeTemplate },
-  props:{
-    index: {}
-  },
+  props: [ 'component', 'slotName'],
   data(){
     return {
 
@@ -50,9 +41,16 @@ export default{
   },
   computed: {
     isScopedSlot(){
-      return this.$slots.default
+
+      const flag = this.$slots.default
+          || this.$scopedSlots.hasOwnProperty(this.slotName)
           || this.$attrs.hasOwnProperty("template")
           || this.$attrs.hasOwnProperty("value")
+          || this.$attrs.hasOwnProperty("render")
+      return flag
+    },
+    isRender(){
+      return this.$attrs.hasOwnProperty("render")
     }
   },
   created() {

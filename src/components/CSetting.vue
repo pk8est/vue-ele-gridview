@@ -8,7 +8,7 @@
         <draggable v-model="ordering" @end="$emit('orderEnd', $event)">
           <el-checkbox
             :label="column.label || column.type"
-            v-for="(column, key) in ordering"
+            v-for="({ column }, key) in ordering"
             :checked="!column.noDisplay"
             :style="{margin: '8px 0', display: 'block'}"
             @change="$emit('isDisplay', key, $event)"

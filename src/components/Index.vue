@@ -3,9 +3,8 @@
     <div class="app-container">
       <c-data-grid
         :dataLoadHandler="dataLoadHandler"
-        :columns="columns"
       >
-        <!-- <template slot="tableBody">
+        <template slot="tableBody">
           <c-td key="expand"  type="expand" label="详细" ></c-td>
           <c-td key="selection"  type="selection" ></c-td>
           <c-td key="index"  type="index" label="序号" ></c-td>
@@ -22,7 +21,12 @@
               {{ scope.row.live_id }}
             </el-button>
           </c-td>
-        </template> -->
+        </template>
+
+        <template slot="hander" scope="{ $row, $index }">
+          <el-button type="primary" size="mini" @click="clickHandler($row, $index)">编辑</el-button>
+        </template>
+
       </c-data-grid>
     </div>
   </div>
@@ -46,12 +50,20 @@ export default {
     let that = this
     return {
       list: list,
-      columns: [
+      umns: [
         {type: 'selection'},
         {type: 'expand'},
         {type: 'index'},
-        {prop: 'id', label: 'ID', sortable: 'custom', fixed: true},
-        {prop: 'uid', label: 'UID'},
+        {prop: 'id', label: 'ID', sortable: 'custom'},
+        {prop: 'uid', label: 'UID', render: (h, props) => {
+            return h('el-button', {
+              props: {size: 'mini'},
+              on: {
+                click: this.clickHandler
+              }
+            }, props.row.uid)
+          }
+        },
         {prop: 'title', label: 'Title', value: (value, index) => '#' + value},
         {prop: 'mark_time', label: '标记时间', template: {
             template: `<el-button @click="clickHandler" size="mini">{{$value}}</el-button>`,
@@ -62,7 +74,8 @@ export default {
               }
             }
           }
-        }
+        },
+        {prop: 'hander', label: '操作', fixed: "right"}
       ]
     }
   },
