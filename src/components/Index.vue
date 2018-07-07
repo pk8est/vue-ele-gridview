@@ -2,9 +2,10 @@
   <div class="app-container calendar-list-container">
     <div class="app-container">
       <c-data-grid
+        :columns="columns" 
         :dataLoadHandler="dataLoadHandler"
       >
-        <template slot="tableBody">
+        <!-- <template slot="tableBody">
           <c-td key="expand"  type="expand" label="详细" ></c-td>
           <c-td key="selection"  type="selection" ></c-td>
           <c-td key="index"  type="index" label="序号" ></c-td>
@@ -21,7 +22,7 @@
               {{ scope.row.live_id }}
             </el-button>
           </c-td>
-        </template>
+        </template> -->
 
         <template slot="hander" scope="{ $row, $index }">
           <el-button type="primary" size="mini" @click="clickHandler($row, $index)">编辑</el-button>
@@ -50,7 +51,7 @@ export default {
     let that = this
     return {
       list: list,
-      umns: [
+      columns: [
         {type: 'selection'},
         {type: 'expand'},
         {type: 'index'},
@@ -67,12 +68,12 @@ export default {
         {prop: 'title', label: 'Title', value: (value, index) => '#' + value},
         {prop: 'mark_time', label: '标记时间', template: {
             template: `<el-button @click="clickHandler" size="mini">{{$value}}</el-button>`,
-            methods: {
+            /*methods: {
               clickHandler(){
                 console.info(that)
                 console.info("clickHandler2")
               }
-            }
+            }*/
           }
         },
         {prop: 'hander', label: '操作', fixed: "right"}
@@ -84,6 +85,7 @@ export default {
   },
   methods: {
     clickHandler(){
+      console.info(this.columns)
       console.info("clickHandler")
     },
     dataLoadHandler(query){

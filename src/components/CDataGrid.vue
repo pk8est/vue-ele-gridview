@@ -43,7 +43,7 @@ export default {
                 page: 1,
                 total: 0,
                 currentPage: 1,
-                pageSize: 5,
+                pageSize: 1,
             }, this.$props.paginations)
         },
         mColumns: {
@@ -63,9 +63,14 @@ export default {
               let component = column.template  || column.component || undefined
               let render = column.render  || undefined
               if(component){
+                const { $data, $options } = this.$parent;
                 component = Object.assign({}, {
                   template: '<template/>',
-                  props: ["$index", "$value", "$scope", "$row", "$column"]
+                  data: () => $data,
+                  props: ["$index", "$value", "$scope", "$row", "$column"],
+                  computed: $options.computed,
+                  components: $options.components,
+                  methods: $options.methods
                 }, typeof component == 'string' ? { component } : component)
               }
               if(slotName !== undefined && render){
