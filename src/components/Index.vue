@@ -2,7 +2,7 @@
   <div class="app-container calendar-list-container">
     <div class="app-container">
       <c-data-grid
-        :columns="columns" 
+        :columns="columns"
         :dataLoadHandler="dataLoadHandler"
       >
         <!-- <template slot="tableBody">
@@ -24,7 +24,7 @@
           </c-td>
         </template> -->
 
-        <template slot="hander" scope="{ $row, $index }">
+        <template slot="handerSlot" scope="{ $row, $index }">
           <el-button type="primary" size="mini" @click="clickHandler($row, $index)">编辑</el-button>
         </template>
 
@@ -53,7 +53,7 @@ export default {
       list: list,
       columns: [
         {type: 'selection'},
-        {type: 'expand'},
+        {type: 'expand', noDisplay: true},
         {type: 'index'},
         {prop: 'id', label: 'ID', sortable: 'custom'},
         {prop: 'uid', label: 'UID', render: (h, props) => {
@@ -66,17 +66,12 @@ export default {
           }
         },
         {prop: 'title', label: 'Title', value: (value, index) => '#' + value},
-        {prop: 'mark_time', label: '标记时间', template: {
-            template: `<el-button @click="clickHandler" size="mini">{{$value}}</el-button>`,
-            /*methods: {
-              clickHandler(){
-                console.info(that)
-                console.info("clickHandler2")
-              }
-            }*/
+        {prop: 'mark_time', label: '标记时间', template: `<el-button @click="clickHandler" size="mini">{{$value | parseTime}}</el-button>`},
+        {prop: 'mark_time2', label: '标记时间', component: {
+            template: `<el-button size="mini">是</el-button>`
           }
         },
-        {prop: 'hander', label: '操作', fixed: "right"}
+        {prop: 'hander', label: '操作', fixed: "right", slotName: 'handerSlot'}
       ]
     }
   },
@@ -85,7 +80,8 @@ export default {
   },
   methods: {
     clickHandler(){
-      console.info(this.columns)
+      //this.columns = []
+      //console.info(this.columns)
       console.info("clickHandler")
     },
     dataLoadHandler(query){

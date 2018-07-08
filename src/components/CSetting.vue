@@ -5,13 +5,13 @@
       ref="settingPopover"
       width="40"
       trigger="click">
-        <draggable v-model="ordering" @end="$emit('orderEnd', $event)">
+        <draggable v-model="mountedColumns">
           <el-checkbox
             :label="column.label || column.type"
-            v-for="({ column }, key) in ordering"
+            v-for="({ column }, key) in mountedColumns"
             :checked="!column.noDisplay"
             :style="{margin: '8px 0', display: 'block'}"
-            @change="$emit('isDisplay', key, $event)"
+            @change="$emit('switchDisplay', key, $event)"
             :key="'setting-'+key">
           </el-checkbox>
         </draggable>
@@ -40,12 +40,12 @@ export default{
 
   },
   computed: {
-    ordering: {
+    mountedColumns: {
       get(){
         return this.columns
       },
       set(value){
-        this.$emit("ordering", value)
+        this.$emit("columnsOrdering", value)
       }
     }
   },

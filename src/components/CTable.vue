@@ -3,25 +3,25 @@
      v-if="!resetTable"
     :data="tableData"
   >
-    <slot name="tableBody"></slot>
+    <slot name="tableBody">
     <!-- <slot name="tableColumns"> -->
       <c-td
         v-if="!column.noDisplay"
-        v-for="({ column, component, slotName }, key) in columnsList"
+        v-for="({ column, template, component, slotName, vNode }, key) in computedColumns"
         v-bind="column"
         :component="component"
+        :template="template"
+        :vNode="vNode"
         :slotName="slotName"
         :key="key"
         :index="key"
         v-on="$listeners"
         >
-          <!-- <template v-if="slotName && typeof $scopedSlots[slotName] !== 'undefined'" :slot="slotName" slot-scope="scope">
-              <slot :name="slotName" v-bind="scope"></slot>
-          </template> -->
           <template :slot="slotName && typeof $scopedSlots[slotName] !== 'undefined' ? slotName : ''" slot-scope="scope">
               <slot :name="slotName" v-bind="scope"></slot>
           </template>
       </c-td>
+    </slot>
     <!-- </slot> -->
   </el-table>
 </template>
@@ -51,7 +51,7 @@ export default{
    
  },
  computed: {
-   columnsList: {
+   computedColumns: {
         get(){
           return this.columns.map((column, index) => {
             return column
