@@ -17,6 +17,9 @@
               {{scope.row.mark_time * 1000 | parseTime('{y}-{m}-{d} {h}:{i}')}}
             </el-button>
           </c-td>
+          <c-td key="cover" prop="cover" label="封面" noDisplay="true">
+            <img :src="row.cover" slot-scope="{ row }"/>
+          </c-td>
           <c-td label="操作" >
             <el-button @click="clickHandler" size="mini" slot-scope="scope">
               {{ scope.row.live_id }}
@@ -71,6 +74,7 @@ export default {
             template: `<el-button size="mini">是</el-button>`
           }
         },
+        {prop: 'cover', label: '封面', template: `<img :src="$value"/>`, noDisplay: true},
         {prop: 'hander', label: '操作', fixed: "right", slotName: 'handerSlot'}
       ]
     }

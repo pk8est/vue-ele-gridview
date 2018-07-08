@@ -1,7 +1,7 @@
 <template>
     <el-table-column v-bind="$attrs" v-if="isScopedSlot">
       <template slot-scope="scope">
-        <slot v-bind="scope"></slot>
+      <slot v-bind="scope"></slot>
         <slot v-bind="scope" :name="slotName">
           <template v-if="$attrs.value">
             {{
