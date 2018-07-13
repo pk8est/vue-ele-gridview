@@ -17,7 +17,7 @@
               {{scope.row.mark_time * 1000 | parseTime('{y}-{m}-{d} {h}:{i}')}}
             </el-button>
           </c-td>
-          <c-td key="cover" prop="cover" label="封面" noDisplay="true">
+          <c-td key="cover" prop="cover" label="封面" display="false">
             <img :src="row.cover" slot-scope="{ row }"/>
           </c-td>
           <c-td label="操作" >
@@ -56,7 +56,7 @@ export default {
       list: list,
       columns: [
         {type: 'selection'},
-        {type: 'expand', noDisplay: true},
+        {type: 'expand', display: false},
         {type: 'index'},
         {prop: 'id', label: 'ID', sortable: 'custom'},
         {prop: 'uid', label: 'UID', render: (h, props) => {
@@ -74,7 +74,7 @@ export default {
             template: `<el-button size="mini">是</el-button>`
           }
         },
-        {prop: 'cover', label: '封面', template: `<img :src="$value"/>`, noDisplay: true},
+        {prop: 'cover', label: '封面', template: `<img :src="$value"/>`, display: false},
         {prop: 'hander', label: '操作', fixed: "right", slotName: 'handerSlot'}
       ]
     }

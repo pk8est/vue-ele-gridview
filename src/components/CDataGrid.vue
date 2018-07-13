@@ -29,7 +29,7 @@ export default {
     data() {
         return {
             sort: '',
-            tableBodyColumns: this.initTableBodyColumns(),
+            tableBodyColumns: [],
             resetTable: false,
             listLoading: false,
             tableData: [],
@@ -48,19 +48,14 @@ export default {
         },
         computedDefaultColumnProps(){
             return Object.assign({}, {
-                noDisplay: false
+                display: true
             }, this.defaultColumnProps)
-        },
-        computedDisplayColumns(){
-            return this.tableBodyColumns.filter(({ column }) => {
-              return column.noDisplay
-            })
         },
         computedScopedSlots(){
             let scopedSlots = Object.assign({}, this.$scopedSlots)
             let tableBodySlots = []
             this.tableBodyColumns.map(({ column, slotName, vNode }) => {
-                if(vNode && !column.noDisplay){
+                if(vNode && column.display){
                     if(slotName){
                         scopedSlots[slotName] = vNode
                     }else{
@@ -88,18 +83,24 @@ export default {
             }
         }
     },
+    beforeCreate(){
+
+    },
     created() {
+      this.tableBodyColumns = this.initTableBodyColumns()
       this.fetchData()
     },
     render(h){
       return h('div', {}, [
           this.renderSetting(h),
+          //this.renderJson(h),
           this.renderTable(h),
           this.renderPagination(h)
       ])
     },
     methods: {
       initTableBodyColumns(columns){
+        let index = 0
         let tableBodyColumns = []
         const defaultColumn = {column: {}, template: undefined, component: undefined, slotName: undefined, vNode: undefined}
 
@@ -107,7 +108,7 @@ export default {
             this.$slots.tableBody.map((vNode, index) => {
               if(vNode.data != undefined && vNode.data.hasOwnProperty("attrs")){
                 let column = Object.assign({}, this.computedDefaultColumnProps, vNode.data.attrs)
-                  tableBodyColumns.push(Object.assign({}, defaultColumn, { vNode, column }))
+                tableBodyColumns.push(Object.assign({}, defaultColumn, { vNode, column, index: index++, display: column.display}))
               }
             })
         }
@@ -135,7 +136,7 @@ export default {
               vNode = (props) => render(this.$createElement, props)
           }
 
-          tableBodyColumns.push(Object.assign({}, defaultColumn, { column, template, component, slotName, vNode}))
+          tableBodyColumns.push(Object.assign({}, defaultColumn, { column, template, component, slotName, vNode, index: index++, display: column.display}))
         })
         return tableBodyColumns
       },
@@ -145,8 +146,16 @@ export default {
             columns: this.tableBodyColumns
           },
           on: {
-            'switchDisplay': this.switchDisplay,
             'columnsOrdering': this.columnsOrdering,
+            'handleCheckAllChange': this.handleCheckAllChange,
+            'handleReset': this.handleReset,
+          }
+        })
+      },
+      renderJson(h){
+        return h("tree-view", {
+          props: {
+            data: this.tableData
           }
         })
       },
@@ -175,10 +184,19 @@ export default {
           },
         })
       },
-      switchDisplay (key, $event){    
-        let column = this.tableBodyColumns[key]
-        column.column.noDisplay = !$event;
-        Vue.set(this.tableBodyColumns, key, column)
+      handleCheckAllChange($event){
+        this.tableBodyColumns = this.tableBodyColumns.filter(({ column }, index) => {
+          column.display = $event
+          return true
+        })
+      },
+      handleReset(){
+        let tableBodyColumns = []
+        this.tableBodyColumns.map((column) => {
+          column.column.display = column.display
+          tableBodyColumns[column.index] = column
+        })
+        this.tableBodyColumns = tableBodyColumns
       },
       columnsOrdering(value){
         this.resetTable = true

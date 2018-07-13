@@ -6,7 +6,7 @@
     <slot name="tableBody">
     <!-- <slot name="tableColumns"> -->
       <c-td
-        v-if="!column.noDisplay"
+        v-if="column.display"
         v-for="({ column, template, component, slotName, vNode }, key) in computedColumns"
         v-bind="column"
         :component="component"
@@ -48,7 +48,7 @@ export default{
     }
  },
  created(){
-   
+
  },
  computed: {
    computedColumns: {
